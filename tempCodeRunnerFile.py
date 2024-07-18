@@ -1,1 +1,0 @@
-automato1.converter_para_er()==automato2.converter_para_er()
