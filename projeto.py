@@ -1,11 +1,15 @@
 from AutomatoFinito import AutomatoFinito
 
+# Função para ler um autômato de um arquivo
 def ler_automato_arquivo(arquivo):
     with open(arquivo, 'r') as f:
         linhas = f.readlines()
 
+    # Leitura dos estados
     estados = set(linhas[0].strip().split(":")[1].split(","))
+    # Leitura do alfabeto
     alfabeto = set(linhas[1].strip().split(":")[1].split(","))
+    # Inicialização das transições
     transicoes = {}
     for transicao in linhas[3:-2]:
         partes = transicao.strip().split()
@@ -14,20 +18,22 @@ def ler_automato_arquivo(arquivo):
         estados_destino = set(partes[2].split(","))
         transicoes[(estado_origem, simbolo)] = estados_destino
 
+    # Leitura do estado inicial
     estado_inicial = linhas[-2].strip().split(":")[1]
+    # Leitura dos estados de aceitação
     estados_aceitacao = set(linhas[-1].strip().split(":")[1].split(","))
 
     return AutomatoFinito(estados, alfabeto, transicoes, estado_inicial, estados_aceitacao)
 
+# Função para ler palavras de um arquivo
 def ler_palavras_arquivo(arquivo):
     with open(arquivo, 'r') as f:
         palavras = f.read().splitlines()
     return palavras
 
 # Método para verificar se dois autômatos mínimos são equivalentes
-def automatos_sao_equivalentes(automato1, automato2):
-    return (automato1.to_er()==automato2.to_er())
-
+def automatos_equivalentes(automato1, automato2):
+    return (automato1.to_er() == automato2.to_er())
 
 # Exemplo de uso
 estados = {"q0", "q1", "q2"}
@@ -37,32 +43,37 @@ transicoes = {
     ("q1", "a"): {"q0"},
     ("q1", "b"): {"q1"},
     ("q0", "b"): {"q2"},
-    ("q2", "b"): {"q1","q0"}
+    ("q2", "b"): {"q1", "q0"}
 }
 estado_inicial = "q0"
-estados_aceitacao = {"q1","q2"}
-automato = AutomatoFinito(estados,alfabeto,transicoes,estado_inicial,estados_aceitacao)
+estados_aceitacao = {"q1", "q2"}
+automatoex = AutomatoFinito(estados, alfabeto, transicoes, estado_inicial, estados_aceitacao)
 
-# Leitura do automato e das palavras
-# automato2 = ler_automato_arquivo('automato2.txt')
-# automato = ler_automato_arquivo('automato.txt')
-# palavras = ler_palavras_arquivo('palavras.txt')
+# Leitura do autômato e das palavras
+automato2 = ler_automato_arquivo('automato2.txt')
+automato = ler_automato_arquivo('automato.txt')
+palavras = ler_palavras_arquivo('palavras.txt')
 
-# Impressão
-print("\nAutomato 1:")
+aux = automato.minimizar()
+# Impressão dos autômatos minimizados e expressões regulares
+print("\nAutomato 1 Min:")
 print(automato.minimizar())
-print("ER:")
-print(automato.minimizar().to_er())
-# print("\nAutomato 2:")
-# print(automato2)
-# print("\nER1:")
-# print(automato.to_er())
-# print("\nER2:")
-# print(automato2.to_er())
+print("\nAutomato 2 Min:")
+print(automato2.minimizar())
+print("\nER1:")
+print(automato.to_er())
+print("\nER2:")
+print(automato2.to_er())
 
-# if automatos_sao_equivalentes(automato,automato2):
-#     print("\nOs automatos são equivalentes")
-# else:
-#     print("\nOs automatos não são equivalentes")
+# Verificação da equivalência dos autômatos
+if automatos_equivalentes(automato, automato2):
+    print("\nOs autômatos são equivalentes")
+    print(f"ER: {automato.minimizar().to_er()}")
+else:
+    print("\nOs autômatos não são equivalentes")
 
-# print(f"ER: {automato.minimizar().to_er()}")
+# Teste das palavras com o método simular
+print("\nResultados da simulação das palavras:")
+for palavra in palavras:
+    resultado = automato.simular(palavra)
+    print(f"A palavra '{palavra}' é aceita pelo autômato? {'Sim' if resultado else 'Não'}")

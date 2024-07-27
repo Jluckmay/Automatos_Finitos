@@ -1,4 +1,5 @@
 class AutomatoFinito:
+    # Inicializa um autômato finito com estados, alfabeto, transições, estado inicial e estados de aceitação
     def __init__(self, estados, alfabeto, transicoes, estado_inicial, estados_aceitacao):
         self.estados = estados
         self.alfabeto = alfabeto
@@ -6,33 +7,43 @@ class AutomatoFinito:
         self.estado_inicial = estado_inicial
         self.estados_aceitacao = estados_aceitacao
     
+    # Adiciona uma transição ao autômato
     def adicionar_transicao(self, estado_origem, simbolo, estado_destino):
+        # Se não houver transição definida para (estado_origem, simbolo), inicializa com um conjunto vazio
         if (estado_origem, simbolo) not in self.transicoes:
             self.transicoes[(estado_origem, simbolo)] = set()
+        # Adiciona o estado_destino ao conjunto de destinos
         self.transicoes[(estado_origem, simbolo)].add(estado_destino)
     
+    # Retorna o conjunto de estados de destino para uma dada transição
     def transicoes_estado(self, estado, simbolo):
         return self.transicoes.get((estado, simbolo), set())
     
+    # Verifica se o autômato é um AFD (Autômato Finito Determinístico)
     def is_AFD(self):
         for (estado, simbolo), estados_destino in self.transicoes.items():
+            # Se um estado e símbolo têm múltiplos destinos, não é um AFD
             if isinstance(estados_destino, set) and len(estados_destino) > 1:
                 return False
         return True
 
+    # Simula o autômato finito determinístico (AFD) para uma palavra
     def __simular_afd(self, palavra):
         estado_atual = self.estado_inicial
         for simbolo in palavra:
-            # input(f'atual:{estado_atual}\ntransições:{self.transicoes}')
+            # Verifica se a transição para o próximo estado é válida
             if (estado_atual, simbolo) in self.transicoes:
                 estado_atual = self.transicoes[(estado_atual, simbolo)]
             else:
                 return False
+        # Verifica se o estado final é um estado de aceitação
         return estado_atual in self.estados_aceitacao
 
+    # Simula o autômato finito não determinístico (AFN) para uma palavra
     def __simular_afn(self, palavra):
         return self.__simular_afn_recursivo(self.estado_inicial, palavra)
 
+    # Função recursiva para simular o AFN
     def __simular_afn_recursivo(self, estado_atual, palavra):
         if not palavra:
             return estado_atual in self.estados_aceitacao
@@ -45,27 +56,31 @@ class AutomatoFinito:
                 return True
         return False
 
+    # Simula o autômato para uma palavra, determinando se é AFD ou AFN
     def simular(self, palavra):
         if self.is_AFD():
             return self.__simular_afd(palavra)
         else:
             return self.__simular_afn(palavra)
         
+    # Converte um autômato finito não determinístico para um autômato finito determinístico (AFD)
     def to_afd(self):
-
-        if(self.is_AFD()):
+        # Se já é AFD, retorna o autômato atual
+        if self.is_AFD():
             return self
 
         novos_estados = set()
         novas_transicoes = {}
         novos_estados_aceitacao = set()
 
+        # Estado inicial do AFD é um conjunto contendo o estado inicial do AFN
         estado_inicial_afd = frozenset([self.estado_inicial])
         estados_afd = [estado_inicial_afd]
         mapeamento = {estado_inicial_afd: 'q0'}
         novo_estado_mapeamento = {'q0': estado_inicial_afd}
         estado_contador = 1
 
+        # Processa todos os estados do AFD a partir do estado inicial
         while estados_afd:
             estado_atual = estados_afd.pop()
             novos_estados.add(mapeamento[estado_atual])
@@ -75,6 +90,7 @@ class AutomatoFinito:
                     destino for origem in estado_atual for destino in self.transicoes.get((origem, simbolo), set())
                 )
                 if novos_destinos:
+                    # Se novos_destinos não está no mapeamento, cria um novo estado
                     if novos_destinos not in mapeamento:
                         novo_nome_estado = f'q{estado_contador}'
                         estado_contador += 1
@@ -83,9 +99,11 @@ class AutomatoFinito:
                         estados_afd.append(novos_destinos)
                     novas_transicoes[(mapeamento[estado_atual], simbolo)] = {mapeamento[novos_destinos]}
 
+                    # Adiciona o novo estado como estado de aceitação se necessário
                     if novos_destinos & self.estados_aceitacao:
                         novos_estados_aceitacao.add(mapeamento[novos_destinos])
 
+        # Cria um novo autômato com os estados e transições determinísticos
         return AutomatoFinito(
             estados=novos_estados,
             alfabeto=self.alfabeto,
@@ -94,20 +112,21 @@ class AutomatoFinito:
             estados_aceitacao=novos_estados_aceitacao
         )
 
+    # Minimiza o autômato determinístico (AFD)
     def minimizar(self):
         # Converte para AFD se necessário antes da minimização
         if not self.is_AFD():
             return self.to_afd().minimizar()
 
-        # Inicialização das partições: estados de aceitação e não aceitação
+        # Inicializa as partições: estados de aceitação e não aceitação
         particoes = [self.estados_aceitacao, self.estados - self.estados_aceitacao]
         conjuntos_pendentes = [self.estados_aceitacao] if self.estados_aceitacao else [self.estados - self.estados_aceitacao]
 
-        # Processa enquanto houver conjuntos pendentes
+        # Processa as partições enquanto houver conjuntos pendentes
         while conjuntos_pendentes:
             conjunto_atual = conjuntos_pendentes.pop()
             for simbolo in self.alfabeto:
-                # Conjunto de estados com transições para o conjunto atual sob o símbolo atual
+                # Conjunto de estados que fazem transição para o conjunto atual sob o símbolo atual
                 estados_com_transicao = {estado for estado in self.estados if any(destino in conjunto_atual for destino in self.transicoes.get((estado, simbolo), []))}
                 novas_particoes = []
                 for particao in particoes:
@@ -115,9 +134,8 @@ class AutomatoFinito:
                     intersecao = particao.intersection(estados_com_transicao)
                     diferenca = particao.difference(estados_com_transicao)
                     if intersecao and diferenca:
-                        # Adiciona novas partições
+                        # Adiciona novas partições e atualiza conjuntos pendentes
                         novas_particoes.extend([intersecao, diferenca])
-                        # Atualiza conjuntos pendentes
                         if particao in conjuntos_pendentes:
                             conjuntos_pendentes.remove(particao)
                             conjuntos_pendentes.extend([intersecao, diferenca])
@@ -136,9 +154,8 @@ class AutomatoFinito:
                 novo_estado_nome[estado] = nome_novo_estado
             novo_estado_contador += 1
 
-        # Conjunto de novos estados
+        # Cria o conjunto de novos estados e ordena os estados de aceitação
         novos_estados = set(novo_estado_nome.values())
-        # Ordena estados de aceitação para que tenham os maiores números
         novos_estados_aceitacao = sorted({novo_estado_nome[estado] for estado in self.estados_aceitacao}, reverse=True)
         novo_estado_inicial = novo_estado_nome[self.estado_inicial]
 
@@ -149,7 +166,7 @@ class AutomatoFinito:
             novo_estado_destino = novo_estado_nome[next(iter(destinos))]
             novas_transicoes[(novo_estado_origem, simbolo)] = {novo_estado_destino}
 
-        # Retorna o novo autômato minimizado
+        # Retorna o autômato minimizado
         return AutomatoFinito(
             estados=novos_estados,
             alfabeto=self.alfabeto,
@@ -158,10 +175,10 @@ class AutomatoFinito:
             estados_aceitacao=set(novos_estados_aceitacao)
         )
    
+    # Converte o autômato para uma expressão regular
     def to_er(self):
-
-        automato = self
-        # Adicionando estados inicial e final únicos
+        automato = self.minimizar()
+        # Adiciona estados inicial e final únicos
         inicial = 'qi'
         final = 'qf'
         automato.estados.add(inicial)
@@ -189,13 +206,13 @@ class AutomatoFinito:
                 tabela[origem][destino] += simbolo or ''
 
         # Eliminando estados intermediários
-        estados = list(automato.estados - {inicial,final})
+        estados = list(automato.estados - {inicial, final})
         estados.sort()
         
         while estados:
             remover = estados.pop(0)
             entradas = [origem for origem in automato.estados if remover in tabela.get(origem, {}) and tabela[origem][remover]]
-            saidas = [destino for destino in automato.estados if destino in tabela and tabela[remover].get(destino)!='']
+            saidas = [destino for destino in automato.estados if destino in tabela and tabela[remover].get(destino) != '']
             entradas.sort()
             saidas.sort()
 
@@ -204,19 +221,22 @@ class AutomatoFinito:
                     r1 = tabela[entrada][remover] 
                     r2 = tabela[remover][remover] 
                     r3 = tabela[remover][saida]
-                    nova_transicao = f"{r1}({r2})*{r3}" if not(r2 in {'','ε' })else f"{r1}{r3}"
-                    if not(tabela[entrada][saida]in {'','ε' }):
+                    # Cria a nova transição eliminando o estado intermediário
+                    nova_transicao = f"{r1}({r2})*{r3}" if not (r2 in {'', 'ε'}) else f"{r1}{r3}"
+                    if not (tabela[entrada][saida] in {'', 'ε'}):
                         tabela[entrada][saida] += '+'
                     tabela[entrada][saida] += nova_transicao
 
+            # Remove o estado intermediário das transições
             for origem in automato.estados:
                 if remover in tabela.get(origem, {}):
                     tabela[origem].pop(remover, None)
             tabela.pop(remover, None)
 
+        # Retorna a expressão regular resultante
         return tabela[inicial][final].replace('ε', '')
 
-    
+    # Representação em string detalhada do autômato
     def __repr__(self):
         estados_ordenados = sorted(self.estados)
         alfabeto_ordenado = sorted(self.alfabeto)
@@ -233,7 +253,7 @@ class AutomatoFinito:
                 f"Estado Inicial: {self.estado_inicial}\n"
                 f"Estados de Aceitação: {estados_aceitacao_ordenados}")
 
-    
+    # Representação em string do autômato
     def __str__(self):
         def formatar_estado(estado):
             if isinstance(estado, frozenset):
@@ -258,4 +278,3 @@ class AutomatoFinito:
                 f"Transições:\n{transicoes_formatadas}\n"
                 f"Estado Inicial: {formatar_estado(self.estado_inicial)}\n"
                 f"Estados de Aceitação: {estados_aceitacao_formatados}")
-    
