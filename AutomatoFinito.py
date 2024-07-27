@@ -95,50 +95,69 @@ class AutomatoFinito:
         )
 
     def minimizar(self):
+        # Converte para AFD se necessário antes da minimização
         if not self.is_AFD():
             return self.to_afd().minimizar()
 
-        P = [self.estados_aceitacao, self.estados - self.estados_aceitacao]
-        W = [self.estados_aceitacao]
+        # Inicialização das partições: estados de aceitação e não aceitação
+        particoes = [self.estados_aceitacao, self.estados - self.estados_aceitacao]
+        conjuntos_pendentes = [self.estados_aceitacao] if self.estados_aceitacao else [self.estados - self.estados_aceitacao]
 
-        while W:
-            A = W.pop()
+        # Processa enquanto houver conjuntos pendentes
+        while conjuntos_pendentes:
+            conjunto_atual = conjuntos_pendentes.pop()
             for simbolo in self.alfabeto:
-                X = {estado for estado in self.estados if self.transicoes.get((estado, simbolo), None) in A}
-                novos_p = []
-                for Y in P:
-                    intersecao = Y.intersection(X)
-                    diferenca = Y.difference(X)
+                # Conjunto de estados com transições para o conjunto atual sob o símbolo atual
+                estados_com_transicao = {estado for estado in self.estados if any(destino in conjunto_atual for destino in self.transicoes.get((estado, simbolo), []))}
+                novas_particoes = []
+                for particao in particoes:
+                    # Divide a partição em interseção e diferença
+                    intersecao = particao.intersection(estados_com_transicao)
+                    diferenca = particao.difference(estados_com_transicao)
                     if intersecao and diferenca:
-                        novos_p.extend([intersecao, diferenca])
-                        if Y in W:
-                            W.remove(Y)
-                            W.extend([intersecao, diferenca])
+                        # Adiciona novas partições
+                        novas_particoes.extend([intersecao, diferenca])
+                        # Atualiza conjuntos pendentes
+                        if particao in conjuntos_pendentes:
+                            conjuntos_pendentes.remove(particao)
+                            conjuntos_pendentes.extend([intersecao, diferenca])
                         else:
-                            W.append(intersecao if len(intersecao) <= len(diferenca) else diferenca)
+                            conjuntos_pendentes.append(intersecao if len(intersecao) <= len(diferenca) else diferenca)
                     else:
-                        novos_p.append(Y)
-                P = novos_p
+                        novas_particoes.append(particao)
+                particoes = novas_particoes
 
-        novo_estado_mapeamento = {estado: ('q'+str(idx)) for idx, subconjunto in enumerate(P) for estado in subconjunto}
-        novos_estados = set(novo_estado_mapeamento.values())
-        novos_estados_aceitacao = {novo_estado_mapeamento[estado] for estado in self.estados_aceitacao}
-        novo_estado_inicial = novo_estado_mapeamento[self.estado_inicial]
+        # Mapeia estados antigos para novos estados minimizados
+        novo_estado_nome = {}
+        novo_estado_contador = 0
+        for subconjunto in sorted(particoes, key=lambda x: (len(x), sorted(x))):
+            nome_novo_estado = f'q{novo_estado_contador}'
+            for estado in subconjunto:
+                novo_estado_nome[estado] = nome_novo_estado
+            novo_estado_contador += 1
+
+        # Conjunto de novos estados
+        novos_estados = set(novo_estado_nome.values())
+        # Ordena estados de aceitação para que tenham os maiores números
+        novos_estados_aceitacao = sorted({novo_estado_nome[estado] for estado in self.estados_aceitacao}, reverse=True)
+        novo_estado_inicial = novo_estado_nome[self.estado_inicial]
+
+        # Constrói as novas transições com base no mapeamento de estados
         novas_transicoes = {}
         for (estado, simbolo), destinos in self.transicoes.items():
-            novo_estado = novo_estado_mapeamento[estado]
-            novo_destino = novo_estado_mapeamento[next(iter(destinos))]  # Considerando que é um AFD
-            novas_transicoes[(novo_estado, simbolo)] = {novo_destino}
+            novo_estado_origem = novo_estado_nome[estado]
+            novo_estado_destino = novo_estado_nome[next(iter(destinos))]
+            novas_transicoes[(novo_estado_origem, simbolo)] = {novo_estado_destino}
 
+        # Retorna o novo autômato minimizado
         return AutomatoFinito(
             estados=novos_estados,
             alfabeto=self.alfabeto,
             transicoes=novas_transicoes,
             estado_inicial=novo_estado_inicial,
-            estados_aceitacao=novos_estados_aceitacao
+            estados_aceitacao=set(novos_estados_aceitacao)
         )
-
-    
+   
     def to_er(self):
 
         automato = self
@@ -185,8 +204,8 @@ class AutomatoFinito:
                     r1 = tabela[entrada][remover] 
                     r2 = tabela[remover][remover] 
                     r3 = tabela[remover][saida]
-                    nova_transicao = f"{r1}({r2})*{r3}" if r2 else f"{r1}{r3}"
-                    if tabela[entrada][saida]:
+                    nova_transicao = f"{r1}({r2})*{r3}" if not(r2 in {'','ε' })else f"{r1}{r3}"
+                    if not(tabela[entrada][saida]in {'','ε' }):
                         tabela[entrada][saida] += '+'
                     tabela[entrada][saida] += nova_transicao
 
@@ -199,31 +218,43 @@ class AutomatoFinito:
 
     
     def __repr__(self):
-        return (f"Estados: {self.estados}\n"
-                f"Alfabeto: {self.alfabeto}\n"
-                f"Transições: {self.transicoes}\n"
+        estados_ordenados = sorted(self.estados)
+        alfabeto_ordenado = sorted(self.alfabeto)
+        transicoes_ordenadas = sorted(self.transicoes.items())
+        estados_aceitacao_ordenados = sorted(self.estados_aceitacao)
+        
+        transicoes_formatadas = [
+            f"({estado}, '{simbolo}') -> {destinos}" for (estado, simbolo), destinos in transicoes_ordenadas
+        ]
+        
+        return (f"Estados: {estados_ordenados}\n"
+                f"Alfabeto: {alfabeto_ordenado}\n"
+                f"Transições:\n" + "\n".join(transicoes_formatadas) + "\n"
                 f"Estado Inicial: {self.estado_inicial}\n"
-                f"Estados de Aceitação: {self.estados_aceitacao}")
+                f"Estados de Aceitação: {estados_aceitacao_ordenados}")
+
     
     def __str__(self):
         def formatar_estado(estado):
             if isinstance(estado, frozenset):
                 return "{" + ", ".join(sorted(estado)) + "}"
             return str(estado)
-
+        
         def formatar_transicoes(transicoes):
-            transicoes_formatadas = []
-            for (origem, simbolo), destinos in transicoes.items():
-                destinos_formatados = ", ".join(formatar_estado(destino) for destino in destinos)
-                transicoes_formatadas.append(f"({formatar_estado(origem)}, '{simbolo}') -> {{{destinos_formatados}}}")
+            transicoes_ordenadas = sorted(transicoes.items())
+            transicoes_formatadas = [
+                f"({formatar_estado(origem)}, '{simbolo}') -> {{{', '.join(sorted(map(formatar_estado, destinos)))}}}" 
+                for (origem, simbolo), destinos in transicoes_ordenadas
+            ]
             return "\n".join(transicoes_formatadas)
-
-        estados_formatados = ", ".join(formatar_estado(estado) for estado in self.estados)
-        estados_aceitacao_formatados = ", ".join(formatar_estado(estado) for estado in self.estados_aceitacao)
+        
+        estados_formatados = ", ".join(sorted(map(formatar_estado, self.estados)))
+        estados_aceitacao_formatados = ", ".join(sorted(map(formatar_estado, self.estados_aceitacao)))
         transicoes_formatadas = formatar_transicoes(self.transicoes)
+        alfabeto_formatado = ", ".join(sorted(self.alfabeto))
 
         return (f"Estados: {estados_formatados}\n"
-                f"Alfabeto: {self.alfabeto}\n"
+                f"Alfabeto: {alfabeto_formatado}\n"
                 f"Transições:\n{transicoes_formatadas}\n"
                 f"Estado Inicial: {formatar_estado(self.estado_inicial)}\n"
                 f"Estados de Aceitação: {estados_aceitacao_formatados}")

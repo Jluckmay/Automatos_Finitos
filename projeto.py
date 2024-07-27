@@ -30,18 +30,17 @@ def automatos_sao_equivalentes(automato1, automato2):
 
 
 # Exemplo de uso
-estados = {"q0", "q1", "q2", "q3", "q4"}
-alfabeto = {"a", "b","c","d"}
+estados = {"q0", "q1", "q2"}
+alfabeto = {"a", "b"}
 transicoes = {
     ("q0", "a"): {"q1"},
-    ("q1", "c"): {"q2"},
-    ("q2", "d"): {"q1"},
-    ("q1", "b"): {"q3"},
-    ("q3", "a"): {"q4"},
-    ("q4", "b"): {"q3"}
+    ("q1", "a"): {"q0"},
+    ("q1", "b"): {"q1"},
+    ("q0", "b"): {"q2"},
+    ("q2", "b"): {"q1","q0"}
 }
 estado_inicial = "q0"
-estados_aceitacao = {"q4"}
+estados_aceitacao = {"q1","q2"}
 automato = AutomatoFinito(estados,alfabeto,transicoes,estado_inicial,estados_aceitacao)
 
 # Leitura do automato e das palavras
@@ -51,9 +50,9 @@ automato = AutomatoFinito(estados,alfabeto,transicoes,estado_inicial,estados_ace
 
 # Impressão
 print("\nAutomato 1:")
-print(automato.to_afd())
-# print("ER:")
-# print(automato.to_er())
+print(automato.minimizar())
+print("ER:")
+print(automato.minimizar().to_er())
 # print("\nAutomato 2:")
 # print(automato2)
 # print("\nER1:")
