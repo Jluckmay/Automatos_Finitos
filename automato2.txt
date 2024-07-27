@@ -1,15 +1,13 @@
-estados:q0,q1,q2,q3,q4
+estados:q0,q1,q2,q3
 alfabeto:a,b
 transicoes:
-q0 a q1
+q0 a q0,q1
 q0 b q0
 q1 a q2
 q1 b q3
 q2 a q2
-q2 b q2
+q2 b q1
+q3 a q3
 q3 b q3
-q3 a q4
-q4 a q2
-q4 b q3
 estado_inicial:q0
-estados_aceitacao:q2,q3,q4
+estados_aceitacao:q2,q3
