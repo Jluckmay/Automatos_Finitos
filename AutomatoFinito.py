@@ -14,7 +14,7 @@ class AutomatoFinito:
     def transicoes_estado(self, estado, simbolo):
         return self.transicoes.get((estado, simbolo), set())
     
-    def eh_deterministico(self):
+    def is_AFD(self):
         for (estado, simbolo), estados_destino in self.transicoes.items():
             if isinstance(estados_destino, set) and len(estados_destino) > 1:
                 return False
@@ -46,14 +46,14 @@ class AutomatoFinito:
         return False
 
     def simular(self, palavra):
-        if self.eh_deterministico():
+        if self.is_AFD():
             return self.__simular_afd(palavra)
         else:
             return self.__simular_afn(palavra)
         
     def to_afd(self):
 
-        if(self.eh_deterministico()):
+        if(self.is_AFD()):
             return self
 
         novos_estados = set()
@@ -95,7 +95,7 @@ class AutomatoFinito:
         )
 
     def minimizar(self):
-        if not self.eh_deterministico():
+        if not self.is_AFD():
             return self.to_afd().minimizar()
 
         P = [self.estados_aceitacao, self.estados - self.estados_aceitacao]
