@@ -26,40 +26,44 @@ def ler_palavras_arquivo(arquivo):
 
 # Método para verificar se dois autômatos mínimos são equivalentes
 def automatos_sao_equivalentes(automato1, automato2):
-    return (automato1.converter_para_er()==automato2.converter_para_er())
+    return (automato1.to_er()==automato2.to_er())
 
 
-# # Exemplo de uso
-# estados = {"q0", "q1", "q2"}
-# alfabeto = {"a", "b"}
-# transicoes = {
-#     ("q0", "a"): {"q1"},
-#     ("q0", "b"): {"q2"},
-#     ("q1", "a"): {"q0"},
-#     ("q1", "b"): {"q1"},
-#     ("q2", "b"): {"q1","q0"}
-# }
-# estado_inicial = "q0"
-# estados_aceitacao = {"q2","q1"}
+# Exemplo de uso
+estados = {"q0", "q1", "q2", "q3", "q4"}
+alfabeto = {"a", "b","c","d"}
+transicoes = {
+    ("q0", "a"): {"q1"},
+    ("q1", "c"): {"q2"},
+    ("q2", "d"): {"q1"},
+    ("q1", "b"): {"q3"},
+    ("q3", "a"): {"q4"},
+    ("q4", "b"): {"q3"}
+}
+estado_inicial = "q0"
+estados_aceitacao = {"q4"}
+automato = AutomatoFinito(estados,alfabeto,transicoes,estado_inicial,estados_aceitacao)
 
 # Leitura do automato e das palavras
-automato2 = ler_automato_arquivo('automato2.txt')
-automato = ler_automato_arquivo('automato.txt')
-palavras = ler_palavras_arquivo('palavras.txt')
+# automato2 = ler_automato_arquivo('automato2.txt')
+# automato = ler_automato_arquivo('automato.txt')
+# palavras = ler_palavras_arquivo('palavras.txt')
 
 # Impressão
-print("Automato 1:")
-print(automato)
-print("\nAutomato 2:")
-print(automato2)
-print("\nER1:")
-print(automato.to_er())
-print("\nER2:")
-print(automato2.to_er())
+print("\nAutomato 1:")
+print(automato.to_afd())
+# print("ER:")
+# print(automato.to_er())
+# print("\nAutomato 2:")
+# print(automato2)
+# print("\nER1:")
+# print(automato.to_er())
+# print("\nER2:")
+# print(automato2.to_er())
 
-if automatos_sao_equivalentes(automato,automato2):
-    print("\nOs automatos são equivalentes")
-else:
-    print("\nOs automatos não são equivalentes")
+# if automatos_sao_equivalentes(automato,automato2):
+#     print("\nOs automatos são equivalentes")
+# else:
+#     print("\nOs automatos não são equivalentes")
 
-print(f"ER: {automato.minimizar().to_er()}")
+# print(f"ER: {automato.minimizar().to_er()}")
