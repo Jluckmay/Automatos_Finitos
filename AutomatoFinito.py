@@ -51,7 +51,11 @@ class AutomatoFinito:
         else:
             return self.__simular_afn(palavra)
         
-    def converter_afn_para_afd(self):
+    def to_afd(self):
+
+        if(self.eh_deterministico()):
+            return self
+
         novos_estados = set()
         novas_transicoes = {}
         novos_estados_aceitacao = set()
@@ -92,7 +96,7 @@ class AutomatoFinito:
 
     def minimizar(self):
         if not self.eh_deterministico():
-            return self.converter_afn_para_afd().minimizar()
+            return self.to_afd().minimizar()
 
         P = [self.estados_aceitacao, self.estados - self.estados_aceitacao]
         W = [self.estados_aceitacao]
