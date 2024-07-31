@@ -1,4 +1,5 @@
 from AutomatoFinito import AutomatoFinito
+import os
 
 # Função para ler um autômato de um arquivo
 def ler_automato_arquivo(arquivo):
@@ -31,6 +32,16 @@ def ler_palavras_arquivo(arquivo):
         palavras = f.read().splitlines()
     return palavras
 
+# Função para ler arquivos de automatos em uma pasta
+def ler_automatos_pasta(pasta):
+    automatos = []
+    for nome_arquivo in os.listdir(pasta):
+        if nome_arquivo.endswith('.txt'):
+            caminho_arquivo = os.path.join(pasta, nome_arquivo)
+            automato = ler_automato_arquivo(caminho_arquivo)
+            automatos.append(automato)
+    return automatos
+
 # Método para verificar se dois autômatos mínimos são equivalentes
 def automatos_equivalentes(automato1, automato2):
     return (automato1.to_er() == automato2.to_er())
@@ -50,41 +61,21 @@ estados_aceitacao = {"q1", "q2"}
 automatoex = AutomatoFinito(estados, alfabeto, transicoes, estado_inicial, estados_aceitacao)
 
 # Leitura do autômato e das palavras
-automato2 = ler_automato_arquivo('Automatos/automato2.txt')
-automato = ler_automato_arquivo('Automatos/automato.txt')
-exemplo = ler_automato_arquivo('Automatos/exemplo.txt')
+automatos = ler_automatos_pasta('Automatos')
 palavras = ler_palavras_arquivo('palavras.txt')
 
-aux = automato.minimizar()
-# Impressão dos autômatos minimizados e expressões regulares
-print("\nAutomato de Exemplo:")
-print(automato)
-print("\nMinimização:")
-print(aux)
-print("\nER:")
-print(exemplo.to_er())
-print("\n\nAutomato 1:")
-print(automato)
-print("\nMinimização:")
-print(automato.minimizar())
-print("\nER:")
-print(automato.to_er())
-print("\n\nAutomato 2:")
-print(automato2)
-print("\nMinimização:")
-print(automato2.minimizar())
-print("\nER:")
-print(automato2.to_er())
+for automato in automatos:
+    aux = automato.minimizar()
+    # Impressão dos autômatos minimizados e expressões regulares
+    print("\n\nAutomato:")
+    print(automato)
+    print("\nMinimização:")
+    print(aux)
+    print("\nER:")
+    print(automato.to_er())
 
-# Verificação da equivalência dos autômatos
-if automatos_equivalentes(automato, automato2):
-    print("\nOs autômatos são equivalentes")
-    print(f"ER: {automato.minimizar().to_er()}")
-else:
-    print("\nOs autômatos não são equivalentes")
-
-# Teste das palavras com o método simular
-print("\nResultados da simulação das palavras:")
-for palavra in palavras:
-    resultado = automato.simular(palavra)
-    print(f"A palavra '{palavra}' é aceita pelo autômato 1? {'Sim' if resultado else 'Não'}")
+    # Teste das palavras com o método simular
+    print("\nResultados da simulação das palavras:")
+    for palavra in palavras:
+        resultado = automato.simular(palavra)
+        print(f"A palavra '{palavra}' é aceita pelo autômato 1? {'Sim' if resultado else 'Não'}")
