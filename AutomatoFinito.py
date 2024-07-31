@@ -44,6 +44,16 @@ class AutomatoFinito:
                 return True
         return False
         
+    # Função recursiva para verificar se o automato é completo
+    def is_complete(self):
+
+        for estado in self.estados:
+            for simbolo in self.alfabeto:
+                if not((estado,simbolo) in self.transicoes):
+                    return False
+                
+        return True
+
     # Converte um autômato finito não determinístico para um autômato finito determinístico (AFD)
     def to_afd(self):
         # Se já é AFD, retorna o autômato atual

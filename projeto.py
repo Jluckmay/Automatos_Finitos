@@ -13,6 +13,7 @@ for automato in automatos:
     print(aux)
     print("\nER:")
     print(automato.to_er())
+    print(f"\nÉ completo? {'Sim' if (automato.is_complete()) else 'Não'}")
 
     # Teste das palavras com o método simular
     print("\nResultados da simulação das palavras:")
