@@ -22,9 +22,15 @@ class AutomatoFinito:
     # Verifica se o autômato é um AFD (Autômato Finito Determinístico)
     def is_AFD(self):
         for (estado, simbolo), estados_destino in self.transicoes.items():
-            # Se um estado e símbolo têm múltiplos destinos, não é um AFD
+            # Se há transição vazia, é AFN
+            if ((simbolo == 'ε') or (simbolo == '')):
+                return False
+            
+            # Se um estado e símbolo têm múltiplos destinos, é um AFN
             if isinstance(estados_destino, set) and len(estados_destino) > 1:
                 return False
+            
+        # Se não é AFN, é AFD
         return True
 
     # Simula o autômato finito não determinístico (AFN) para uma palavra
