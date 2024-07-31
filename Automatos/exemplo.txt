@@ -1,0 +1,13 @@
+estados:s0,s1,s2,s3,s4
+alfabeto:a,b
+transicoes:
+s1 a s0
+s0 a s3
+s0 b s2
+s2 a s4
+s3 b s2
+s3 a s3
+s4 a s3
+s4 b s2
+estado_inicial:s1
+estados_aceitacao:s3,s4
