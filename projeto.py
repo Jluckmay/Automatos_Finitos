@@ -50,19 +50,30 @@ estados_aceitacao = {"q1", "q2"}
 automatoex = AutomatoFinito(estados, alfabeto, transicoes, estado_inicial, estados_aceitacao)
 
 # Leitura do autômato e das palavras
-automato2 = ler_automato_arquivo('automato2.txt')
-automato = ler_automato_arquivo('automato.txt')
+automato2 = ler_automato_arquivo('Automatos/automato2.txt')
+automato = ler_automato_arquivo('Automatos/automato.txt')
+exemplo = ler_automato_arquivo('Automatos/exemplo.txt')
 palavras = ler_palavras_arquivo('palavras.txt')
 
 aux = automato.minimizar()
 # Impressão dos autômatos minimizados e expressões regulares
-print("\nAutomato 1 Min:")
+print("\nAutomato de Exemplo:")
+print(automato)
+print("\nMinimização:")
+print(aux)
+print("\nER:")
+print(exemplo.to_er())
+print("\n\nAutomato 1:")
+print(automato)
+print("\nMinimização:")
 print(automato.minimizar())
-print("\nAutomato 2 Min:")
-print(automato2.minimizar())
-print("\nER1:")
+print("\nER:")
 print(automato.to_er())
-print("\nER2:")
+print("\n\nAutomato 2:")
+print(automato2)
+print("\nMinimização:")
+print(automato2.minimizar())
+print("\nER:")
 print(automato2.to_er())
 
 # Verificação da equivalência dos autômatos
@@ -76,4 +87,4 @@ else:
 print("\nResultados da simulação das palavras:")
 for palavra in palavras:
     resultado = automato.simular(palavra)
-    print(f"A palavra '{palavra}' é aceita pelo autômato? {'Sim' if resultado else 'Não'}")
+    print(f"A palavra '{palavra}' é aceita pelo autômato 1? {'Sim' if resultado else 'Não'}")

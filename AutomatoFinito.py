@@ -27,24 +27,12 @@ class AutomatoFinito:
                 return False
         return True
 
-    # Simula o autômato finito determinístico (AFD) para uma palavra
-    def __simular_afd(self, palavra):
-        estado_atual = self.estado_inicial
-        for simbolo in palavra:
-            # Verifica se a transição para o próximo estado é válida
-            if (estado_atual, simbolo) in self.transicoes:
-                estado_atual = self.transicoes[(estado_atual, simbolo)]
-            else:
-                return False
-        # Verifica se o estado final é um estado de aceitação
-        return estado_atual in self.estados_aceitacao
-
     # Simula o autômato finito não determinístico (AFN) para uma palavra
-    def __simular_afn(self, palavra):
-        return self.__simular_afn_recursivo(self.estado_inicial, palavra)
+    def simular(self, palavra):
+        return self.__simular_recursivo(self.estado_inicial, palavra)
 
     # Função recursiva para simular o AFN
-    def __simular_afn_recursivo(self, estado_atual, palavra):
+    def __simular_recursivo(self, estado_atual, palavra):
         if not palavra:
             return estado_atual in self.estados_aceitacao
 
@@ -52,16 +40,9 @@ class AutomatoFinito:
         palavra_restante = palavra[1:]
 
         for proximo_estado in self.transicoes_estado(estado_atual, simbolo):
-            if self.__simular_afn_recursivo(proximo_estado, palavra_restante):
+            if self.__simular_recursivo(proximo_estado, palavra_restante):
                 return True
         return False
-
-    # Simula o autômato para uma palavra, determinando se é AFD ou AFN
-    def simular(self, palavra):
-        if self.is_AFD():
-            return self.__simular_afd(palavra)
-        else:
-            return self.__simular_afn(palavra)
         
     # Converte um autômato finito não determinístico para um autômato finito determinístico (AFD)
     def to_afd(self):
