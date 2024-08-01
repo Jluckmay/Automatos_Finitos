@@ -34,6 +34,10 @@ def ler_palavras_arquivo(arquivo):
 
 # Função para ler arquivos de automatos em uma pasta
 def ler_automatos_pasta(pasta):
+
+    if not os.path.exists(pasta):
+            os.makedirs(pasta)
+            
     automatos = []
     for nome_arquivo in os.listdir(pasta):
         if nome_arquivo.endswith('.txt'):
