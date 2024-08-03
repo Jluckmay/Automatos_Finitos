@@ -3,7 +3,7 @@ from graphviz import Digraph
 
 class AutomatoFinito:
     # Inicializa um autômato finito com estados, alfabeto, transições, estado inicial e estados de aceitação
-    def __init__(self, estados=[], alfabeto=[], transicoes={}, estado_inicial=None, estados_aceitacao=[]):
+    def __init__(self, estados=set(), alfabeto=set(), transicoes={}, estado_inicial=None, estados_aceitacao=set()):
         self.estados = estados
         self.alfabeto = alfabeto
         self.transicoes = transicoes
@@ -11,11 +11,11 @@ class AutomatoFinito:
         self.estados_aceitacao = estados_aceitacao
 
     def adicionar_estado(self, estado, inicial=False, aceitacao=False):
-        self.estados.append(estado)
+        self.estados.add(estado)
         if inicial:
             self.estado_inicial = estado
         if aceitacao:
-            self.estados_aceitacao.append(estado)
+            self.estados_aceitacao.add(estado)
     
     # Adiciona uma transição ao autômato
     def adicionar_transicao(self, estado_origem, simbolo, estado_destino):

@@ -19,33 +19,31 @@ if arquivo_upload is not None:
         f.write(arquivo_upload.getbuffer())
 
     automato = ler_automato_arquivo(caminho_arquivo)
-    
-    st.write('Estados:', ', '.join(automato.estados))
-    st.write('Alfabeto:', ', '.join(automato.alfabeto))
-    st.write('Estado Inicial:', automato.estado_inicial)
-    st.write('Estados de Aceitação:', ', '.join(automato.estados_aceitacao))
-    st.write('Transições:')
-    for (origem, simbolo), destinos in automato.transicoes.items():
-        for destino in destinos:
-            st.write(f'{origem} --{simbolo}--> {destino}')
-else:
-    # Definição dos estados
-    num_estados = st.number_input('Número de estados', min_value=1, step=1)
-    for i in range(num_estados):
-        estado = st.text_input(f'Nome do estado {i+1}', key=f'estado_{i}')
-        inicial = st.checkbox(f'Estado inicial {i+1}', key=f'inicial_{i}')
-        aceitacao = st.checkbox(f'Estado de aceitação {i+1}', key=f'aceitacao_{i}')
-        if estado:
-            automato.adicionar_estado(estado, inicial, aceitacao)
 
-    # Definição das transições
-    num_transicoes = st.number_input('Número de transições', min_value=1, step=1)
-    for i in range(num_transicoes):
-        origem = st.text_input(f'Estado de origem {i+1}', key=f'origem_{i}')
-        simbolo = st.text_input(f'Símbolo {i+1}', key=f'simbolo_{i}')
-        destino = st.text_input(f'Estado de destino {i+1}', key=f'destino_{i}')
+estados = list(automato.estados)
+estados.sort()
+
+num_estados = st.number_input('Número de estados', min_value=0, step=1, value=len(automato.estados))
+
+# Definição dos estados
+for i in range(num_estados):
+    estado = st.text_input(f'Nome do estado {i+1}', key=f'estado_{i}',value=estados[i])
+    inicial = st.checkbox(f'Estado inicial {i+1}', key=f'inicial_{i}',value=(automato.estado_inicial==estados[i]))
+    aceitacao = st.checkbox(f'Estado de aceitação {i+1}', key=f'aceitacao_{i}',value=(estados[i] in automato.estados_aceitacao))
+    if estado:
+        automato.adicionar_estado(estado, inicial, aceitacao)
+
+# Definição das transições
+num_transicoes = st.number_input('Número de transições', min_value=0, step=1,value=(len(automato.transicoes)))
+for i in range(num_estados):
+    for j in automato.alfabeto:
+        origem = st.text_input(f'Estado de origem {i+1}', key=f'origem_{i}{j}',value=estados[i])
+        simbolo = st.text_input(f'Símbolo {i+1}', key=f'simbolo_{i}{j}', value=j)
+        destino = st.text_input(f'Estado de destino {i+1}', key=f'destino_{i}{j}',value=str(automato.transicoes_estado(estados[i],j)).replace('{','').replace('\'','').replace('}',''))
         if origem and simbolo and destino:
-            automato.adicionar_transicao(origem, simbolo, destino)
+            if(',' in destino):
+                for no in destino.replace(' ','').split(','):
+                    automato.adicionar_transicao(origem, simbolo, no)
 
 # Gerar imagem
 if st.button('Gerar imagem'):
