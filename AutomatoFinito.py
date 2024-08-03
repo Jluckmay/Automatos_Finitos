@@ -1,21 +1,14 @@
 import os
-import networkx as nx
-import matplotlib.pyplot as plt
+from graphviz import Digraph
 
 class AutomatoFinito:
     # Inicializa um autômato finito com estados, alfabeto, transições, estado inicial e estados de aceitação
-    def __init__(self, estados, alfabeto, transicoes, estado_inicial, estados_aceitacao):
+    def __init__(self, estados=[], alfabeto=[], transicoes={}, estado_inicial=None, estados_aceitacao=[]):
         self.estados = estados
         self.alfabeto = alfabeto
         self.transicoes = transicoes
         self.estado_inicial = estado_inicial
         self.estados_aceitacao = estados_aceitacao
-
-    def __init__(self):
-        self.estados = []
-        self.transicoes = {}
-        self.estado_inicial = None
-        self.estados_aceitacao = []
 
     def adicionar_estado(self, estado, inicial=False, aceitacao=False):
         self.estados.append(estado)
@@ -250,8 +243,28 @@ class AutomatoFinito:
         # Retorna a expressão regular resultante
         return tabela[inicial][final].replace('ε', '')
 
-    def criar_imagem(self):
-        # Configuração de pasta e nome de imagem
+    def criar_imagem(self, color='gray'):
+
+        imagem = Digraph()
+
+        imagem.attr(bgcolor='transparent')
+
+        imagem.attr(rankdir='LR')
+
+        for estado in self.estados:
+                imagem.node(estado,shape='doublecircle' if estado in self.estados_aceitacao else 'circle', color=color, fontcolor=color)
+                for simbolo in self.alfabeto:
+                    destinos = self.transicoes_estado(estado,simbolo)
+                    for destino in destinos:
+                        imagem.edge(estado,destino,label=simbolo, color=color, fontcolor=color)
+
+        imagem.node('',shape='point', color=color)
+        imagem.edge('',self.estado_inicial, color=color)
+
+        return imagem
+
+    def render_image(self, imagem):
+         # Configuração de pasta e nome de imagem
         pasta = 'Imagens'
         if not os.path.exists(pasta):
             os.makedirs(pasta)
@@ -265,63 +278,12 @@ class AutomatoFinito:
             nome_imagem = automatos[-1].split('.')[0]
             nome_imagem = str(int(nome_imagem) + 1)
 
-        caminho = os.path.join(pasta, f'{nome_imagem}.png')
+        caminho = os.path.join(pasta, nome_imagem)
 
-        G = nx.MultiDiGraph()
-        for estado in self.estados:
-            G.add_node(estado, shape='circle')
-
-        for (origem, simbolo), destinos in self.transicoes.items():
-            for destino in destinos:
-                G.add_edge(origem, destino, label=simbolo)
-
-        G.add_edge('', self.estado_inicial, label='')
-
-        pos = nx.shell_layout(G)
-        plt.figure(figsize=(10, 8))
-
-        # Desenha nós normais
-        nx.draw_networkx_nodes(
-            G, pos,
-            nodelist=[estado for estado in self.estados if estado not in self.estados_aceitacao and estado != ''],
-            node_color='skyblue',
-            node_size=2000,
-            node_shape='o'
-        )
-
-        # Desenha nós de aceitação com dois círculos
-        nx.draw_networkx_nodes(
-            G, pos,
-            nodelist=self.estados_aceitacao,
-            node_color='skyblue',
-            node_size=2000,
-            node_shape='o',
-            linewidths=2, edgecolors='k'
-        )
-        nx.draw_networkx_nodes(
-            G, pos,
-            nodelist=self.estados_aceitacao,
-            node_color='none',
-            node_size=2500,
-            node_shape='o',
-            linewidths=2, edgecolors='k'
-        )
-        nx.draw_networkx_nodes(
-            G, pos,
-            nodelist={''},
-            node_color='none',
-            node_size=2500,
-            node_shape='o',
-            linewidths=0, edgecolors='k'
-        )
-
-        nx.draw(G, pos, with_labels=True, node_size=2000, node_color='none', font_size=10, font_weight='bold', arrowsize=20)
-        edge_labels = {(u, v): d['label'] for u, v, d in G.edges(data=True)}
-        nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_size=10)
-
-        plt.savefig(caminho, format='PNG')
-        plt.close()
+        imagem.render(caminho,cleanup=True,format='png')
         
+        return caminho+'.png'
+
     # Representação em string detalhada do autômato
     def __repr__(self):
         estados_ordenados = sorted(self.estados)
