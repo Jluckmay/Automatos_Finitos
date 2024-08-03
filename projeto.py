@@ -14,7 +14,8 @@ for automato in automatos:
     print("\nER:")
     print(automato.to_er())
     print(f"\nÉ completo? {'Sim' if (automato.is_complete()) else 'Não'}")
-    automato.criar_imagem()
+    
+    automato.render_image(automato.criar_imagem())
 
     # Teste das palavras com o método simular
     print("\nResultados da simulação das palavras:")
