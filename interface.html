@@ -1,0 +1,690 @@
+<html><head><base href="https://websim.createonion.ai/automataFinito/">
+<title>Autômato Finito - Representação Visual Aprimorada</title>
+<style>
+  body {
+    font-family: 'Roboto', Arial, sans-serif;
+    line-height: 1.6;
+    color: #e0e0e0;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #1a1a1a;
+  }
+  h1, h2, h3 {
+    color: #ffffff;
+  }
+  .container {
+    display: flex;
+    justify-content: space-between;
+  }
+  .input-section, .output-section {
+    width: 48%;
+    background-color: #2a2a2a;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(255,255,255,0.1);
+  }
+  .input-group {
+    margin-bottom: 15px;
+  }
+  label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  input[type="text"], textarea, select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #444;
+    border-radius: 4px;
+    background-color: #333;
+    color: #e0e0e0;
+  }
+  button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border-radius: 4px;
+  }
+  button:hover {
+    background-color: #2980b9;
+  }
+  .visual-output {
+    margin-top: 20px;
+    border: 1px solid #444;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  #automataList {
+    margin-top: 20px;
+  }
+  .automaton-item {
+    background-color: #e74c3c;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    display: inline-block;
+  }
+  .comparison-section {
+    margin-top: 20px;
+  }
+  .er-display {
+    background-color: #2c3e50;
+    border: 1px solid #34495e;
+    border-radius: 4px;
+    padding: 10px;
+    margin: 10px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    overflow-wrap: break-word;
+  }
+  .graph-title {
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 5px;
+    color: #ffffff;
+    text-decoration: underline;
+  }
+</style>
+<script src="https://d3js.org/d3.v6.min.js"></script>
+</head>
+<body>
+  <h1>Autômato Finito - Representação Visual Aprimorada</h1>
+  
+  <div class="container">
+    <div class="input-section">
+      <h2>Entrada</h2>
+      <div class="input-group">
+        <label for="nomeAutomato">Nome do Autômato:</label>
+        <input type="text" id="nomeAutomato" placeholder="Autômato1">
+      </div>
+      
+      <div class="input-group">
+        <label for="estados">Estados (separados por vírgula):</label>
+        <input type="text" id="estados" placeholder="s0, s1, s2, s3, s4">
+      </div>
+      
+      <div class="input-group">
+        <label for="alfabeto">Alfabeto (separados por vírgula):</label>
+        <input type="text" id="alfabeto" placeholder="a, b">
+      </div>
+      
+      <div class="input-group">
+        <label for="transicoes">Transições (formato: origem simbolo destino; uma por linha):</label>
+        <textarea id="transicoes" rows="5" placeholder="s0 a s1
+s0 b s2
+s1 a s1
+s1 b s3
+s1 a s3
+s1 a s4
+s2 b s2
+s2 a s1
+s3 b s4
+s3 a s1
+s4 b s2"></textarea>
+      </div>
+      
+      <div class="input-group">
+        <label for="estadoInicial">Estado Inicial:</label>
+        <input type="text" id="estadoInicial" placeholder="s0">
+      </div>
+      
+      <div class="input-group">
+        <label for="estadosAceitacao">Estados de Aceitação (separados por vírgula):</label>
+        <input type="text" id="estadosAceitacao" placeholder="s4">
+      </div>
+      
+      <button onclick="criarEAnalisarAutomato()">Criar e Analisar Autômato</button>
+      
+      <h2>Autômatos Criados</h2>
+      <div id="automataList"></div>
+
+      <div class="comparison-section">
+        <h2>Comparação de Autômatos</h2>
+        <div class="input-group">
+          <label for="automato1">Autômato 1:</label>
+          <select id="automato1"></select>
+        </div>
+        <div class="input-group">
+          <label for="automato2">Autômato 2:</label>
+          <select id="automato2"></select>
+        </div>
+        <button onclick="compararAutomatos()">Comparar Autômatos</button>
+      </div>
+    </div>
+    
+    <div class="output-section">
+      <h2>Saída Visual</h2>
+      <div id="ER" class="visual-output"></div>
+      <div id="Info" class="visual-output"></div>
+      <div id="Auto_title" class="visual-output"></div>
+      <div id="Auto" class="visual-output"></div>
+      <div id="Auto_Min_title" class="visual-output"></div>
+      <div id="Auto_Min" class="visual-output"></div>
+      <div id="comparisonOutput"></div>
+    </div>
+  </div>
+
+  <script>
+    let automatos = {};
+
+    class AutomatoFinito {
+      constructor(estados, alfabeto, transicoes, estadoInicial, estadosAceitacao) {
+        this.estados = new Set(estados);
+        this.alfabeto = new Set(alfabeto);
+        this.transicoes = transicoes;
+        this.estadoInicial = estadoInicial;
+        this.estadosAceitacao = new Set(estadosAceitacao);
+      }
+
+      adicionarTransicao(estadoOrigem, simbolo, estadoDestino) {
+        const chave = `${estadoOrigem} ${simbolo}`;
+        if (!this.transicoes[chave]) {
+          this.transicoes[chave] = new Set();
+        }
+        this.transicoes[chave].add(estadoDestino);
+      }
+
+      transicoesEstado(estado, simbolo) {
+        return this.transicoes[`${estado} ${simbolo}`] || new Set();
+      }
+
+      isAFD() {
+        for (const [chave, destinos] of Object.entries(this.transicoes)) {
+          const [, simbolo] = chave.split(' ');
+          if (simbolo === 'ε' || simbolo === '') return false;
+          if (destinos.size > 1) return false;
+        }
+        return true;
+      }
+
+      isComplete() {
+        for (const estado of this.estados) {
+          for (const simbolo of this.alfabeto) {
+            if (!this.transicoes[`${estado} ${simbolo}`]) {
+              return false;
+            }
+          }
+        }
+        return true;
+      }
+
+      toAFD() {
+        if (this.isAFD()) return this;
+
+        const novosEstados = new Set();
+        const novasTransicoes = {};
+        const novosEstadosAceitacao = new Set();
+
+        const estadoInicialAFD = JSON.stringify([this.estadoInicial]);
+        const estadosAFD = [estadoInicialAFD];
+        const mapeamento = { [estadoInicialAFD]: 's0' };
+        const novoEstadoMapeamento = { 's0': JSON.parse(estadoInicialAFD) };
+        let estadoContador = 1;
+
+        while (estadosAFD.length > 0) {
+          const estadoAtual = JSON.parse(estadosAFD.pop());
+          novosEstados.add(mapeamento[JSON.stringify(estadoAtual)]);
+
+          for (const simbolo of this.alfabeto) {
+            const novosDestinos = new Set();
+            for (const origem of estadoAtual) {
+              for (const destino of this.transicoesEstado(origem, simbolo)) {
+                novosDestinos.add(destino);
+              }
+            }
+            if (novosDestinos.size > 0) {
+              const novosDestinosArray = Array.from(novosDestinos).sort();
+              const novosDestinosString = JSON.stringify(novosDestinosArray);
+              if (!mapeamento[novosDestinosString]) {
+                const novoNomeEstado = `s${estadoContador++}`;
+                mapeamento[novosDestinosString] = novoNomeEstado;
+                novoEstadoMapeamento[novoNomeEstado] = novosDestinosArray;
+                estadosAFD.push(novosDestinosString);
+              }
+              novasTransicoes[`${mapeamento[JSON.stringify(estadoAtual)]} ${simbolo}`] = new Set([mapeamento[novosDestinosString]]);
+
+              if (novosDestinosArray.some(estado => this.estadosAceitacao.has(estado))) {
+                novosEstadosAceitacao.add(mapeamento[novosDestinosString]);
+              }
+            }
+          }
+        }
+
+        return new AutomatoFinito(
+          Array.from(novosEstados),
+          Array.from(this.alfabeto),
+          novasTransicoes,
+          mapeamento[estadoInicialAFD],
+          Array.from(novosEstadosAceitacao)
+        );
+      }
+
+      minimizar() {
+        if (!this.isAFD()) {
+          return this.toAFD().minimizar();
+        }
+
+        let particoes = [
+          new Set(Array.from(this.estadosAceitacao)),
+          new Set(Array.from(this.estados).filter(estado => !this.estadosAceitacao.has(estado)))
+        ];
+        let conjuntosPendentes = particoes[0].size > 0 ? [particoes[0]] : [particoes[1]];
+
+        while (conjuntosPendentes.length > 0) {
+          const conjuntoAtual = conjuntosPendentes.pop();
+          for (const simbolo of this.alfabeto) {
+            const estadosComTransicao = new Set();
+            for (const estado of this.estados) {
+              const destinos = this.transicoesEstado(estado, simbolo);
+              if (Array.from(destinos).some(destino => conjuntoAtual.has(destino))) {
+                estadosComTransicao.add(estado);
+              }
+            }
+            const novasParticoes = [];
+            for (const particao of particoes) {
+              const intersecao = new Set([...particao].filter(x => estadosComTransicao.has(x)));
+              const diferenca = new Set([...particao].filter(x => !estadosComTransicao.has(x)));
+              if (intersecao.size > 0 && diferenca.size > 0) {
+                novasParticoes.push(intersecao, diferenca);
+                if (conjuntosPendentes.some(set => isEqual(set, particao))) {
+                  conjuntosPendentes = conjuntosPendentes.filter(set => !isEqual(set, particao));
+                  conjuntosPendentes.push(intersecao.size <= diferenca.size ? intersecao : diferenca);
+                } else {
+                  conjuntosPendentes.push(intersecao.size <= diferenca.size ? intersecao : diferenca);
+                }
+              } else {
+                novasParticoes.push(particao);
+              }
+            }
+            particoes = novasParticoes;
+          }
+        }
+
+        const novoEstadoNome = {};
+        let novoEstadoContador = 0;
+        for (const subconjunto of particoes) {
+          const nomeNovoEstado = `s${novoEstadoContador++}`;
+          for (const estado of subconjunto) {
+            novoEstadoNome[estado] = nomeNovoEstado;
+          }
+        }
+
+        const novosEstados = new Set(Object.values(novoEstadoNome));
+        const novosEstadosAceitacao = new Set(Array.from(this.estadosAceitacao).map(estado => novoEstadoNome[estado]));
+        const novoEstadoInicial = novoEstadoNome[this.estadoInicial];
+
+        const novasTransicoes = {};
+        for (const [chave, destinos] of Object.entries(this.transicoes)) {
+          const [estado, simbolo] = chave.split(' ');
+          const novoEstadoOrigem = novoEstadoNome[estado];
+          const novoEstadoDestino = novoEstadoNome[Array.from(destinos)[0]];
+          novasTransicoes[`${novoEstadoOrigem} ${simbolo}`] = new Set([novoEstadoDestino]);
+        }
+
+        return new AutomatoFinito(
+          Array.from(novosEstados),
+          Array.from(this.alfabeto),
+          novasTransicoes,
+          novoEstadoInicial,
+          Array.from(novosEstadosAceitacao)
+        );
+      }
+
+      toER() {
+        const automato = this.minimizar();
+        const inicial = 'si';
+        const final = 'sf';
+        automato.estados.add(inicial);
+        automato.estados.add(final);
+
+        for (const estado of automato.estadosAceitacao) {
+          automato.adicionarTransicao(estado, 'ε', final);
+        }
+
+        automato.adicionarTransicao(inicial, 'ε', automato.estadoInicial);
+
+        automato.estadoInicial = inicial;
+        automato.estadosAceitacao = new Set([final]);
+
+        const tabela = {};
+        for (const origem of automato.estados) {
+          tabela[origem] = {};
+          for (const destino of automato.estados) {
+            tabela[origem][destino] = '';
+          }
+        }
+
+        for (const [chave, destinos] of Object.entries(automato.transicoes)) {
+          const [origem, simbolo] = chave.split(' ');
+          for (const destino of destinos) {
+            if (tabela[origem][destino]) {
+              tabela[origem][destino] += '+';
+            }
+            tabela[origem][destino] += simbolo || '';
+          }
+        }
+
+        const estados = Array.from(automato.estados).filter(estado => estado !== inicial && estado !== final);
+        estados.sort();
+
+        while (estados.length > 0) {
+          const remover = estados.shift();
+          const entradas = Array.from(automato.estados).filter(origem => tabela[origem] && tabela[origem][remover]);
+          const saidas = Array.from(automato.estados).filter(destino => tabela[remover] && tabela[remover][destino]);
+          entradas.sort();
+          saidas.sort();
+
+          for (const entrada of entradas) {
+            for (const saida of saidas) {
+              const r1 = tabela[entrada][remover];
+              const r2 = tabela[remover][remover];
+              const r3 = tabela[remover][saida];
+              const novaTransicao = (r2!='' && r2 !== 'ε') ? `(${r1})(${r2})*(${r3})` : `(${r1})(${r3})`;
+              if (tabela[entrada][saida]!='' && tabela[entrada][saida]!='ε') {
+                tabela[entrada][saida] = `(${tabela[entrada][saida]})+(${novaTransicao})`;
+              } else {
+                tabela[entrada][saida] = novaTransicao;
+              }
+            }
+          }
+
+          for (const origem of automato.estados) {
+            if (tabela[origem] && remover in tabela[origem]) {
+              delete tabela[origem][remover];
+            }
+          }
+          delete tabela[remover];
+        }
+
+        return tabela[inicial][final].replace('(ε)*', '').replace('(ε)', '').replace('+ε', '').replace('ε+', '').replace('ε','').replace('()','');
+      }
+    }
+
+    function criarEAnalisarAutomato() {
+      const nome = document.getElementById('nomeAutomato').value.trim();
+      const estados = document.getElementById('estados').value.split(',').map(s => s.trim());
+      const alfabeto = document.getElementById('alfabeto').value.split(',').map(s => s.trim());
+      const transicoes = {};
+      document.getElementById('transicoes').value.split('\n').forEach(linha => {
+        const [origem, simbolo, destino] = linha.split(' ').map(s => s.trim());
+        const chave = `${origem} ${simbolo}`;
+        if (!transicoes[chave]) {
+          transicoes[chave] = new Set();
+        }
+        transicoes[chave].add(destino);
+      });
+      const estadoInicial = document.getElementById('estadoInicial').value.trim();
+      const estadosAceitacao = document.getElementById('estadosAceitacao').value.split(',').map(s => s.trim());
+
+      const automato = new AutomatoFinito(estados, alfabeto, transicoes, estadoInicial, estadosAceitacao);
+      automatos[nome] = automato;
+
+      const minimizado = automato.minimizar();
+      automatos[`${nome}_minimizado`] = minimizado;
+
+      visualizarAutomato(automato, minimizado, nome);
+      atualizarListaAutomatos();
+    }
+
+    function visualizarAutomato(automato, minimizado, nome) {
+      const width = 800;
+      const height = 800;
+      const radius = 25;
+
+      d3.select("#Info").selectAll("*").remove();
+      const info = d3.select("#Info")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", '5%');
+
+      // Adicionar título
+      info.append("text")
+        .attr("x", "35%")
+        .attr("y", '40%')
+        .attr("text-anchor", "middle")
+        .style("font-size", "20px")
+        .style("font-weight", "bold")
+        .style("fill", "#ffffff")
+        .text(`Autômato "${nome}"`);
+
+      // Adicionar informações
+      const infoText = `AFD: ${automato.isAFD() ? "Sim" : "Não"} | Completo: ${automato.isComplete() ? "Sim" : "Não"}`;
+      info.append("text")
+        .attr("x", "35%")
+        .attr("y", '70%')
+        .attr("text-anchor", "middle")
+        .style("font-size", "14px")
+        .style("fill", "#e0e0e0")
+        .text(infoText);
+
+
+      d3.select("#ER").selectAll("*").remove();
+      r = d3.select('#ER');
+
+      // Adicionar expressão regular
+      const er = automato.toER();
+      r.append("foreignObject")
+        .attr("x", 20)
+        .attr("y", 70)
+        .attr("width", width - 40)
+        .attr("height", '20%')
+        .append("xhtml:div")
+        .attr("class", "er-display")
+        .html(`<strong>Expressão Regular:</strong> ${er}`);
+
+      function createGraph(automato, yOffset, title,id) {
+        
+      // Adicionar título para o gráfico
+      d3.select(`#${id}_title`).selectAll("*").remove();
+        t = d3.select(`#${id}_title`)
+        .append("svg")
+        .attr("width", width)
+        .attr("height", '2%');
+    
+        t.append("text")
+          .attr("x", "35%")
+          .attr("y", "60%")
+          .attr("text-anchor", "middle")
+          .style("fill", "#e0e0e0")
+          .attr("class", "graph-title")
+          .text(title);
+
+        const nodes = Array.from(automato.estados).map(estado => ({id: estado}));
+        const links = Object.entries(automato.transicoes).flatMap(([chave, destinos]) => {
+          const [origem, simbolo] = chave.split(' ');
+          return Array.from(destinos).map(destino => ({source: origem, target: destino, label: simbolo}));
+        });
+
+        const simulation = d3.forceSimulation(nodes)
+          .force("link", d3.forceLink(links).id(d => d.id).distance(100))
+          .force("charge", d3.forceManyBody().strength(-300))
+          .force("center", d3.forceCenter(width / 2.65, yOffset));
+
+        // Desenhando automato
+        d3.select(`#${id}`).selectAll("*").remove();
+        auto = d3.select(`#${id}`)
+        .append("svg")
+        .attr("width", width)
+        .attr("height", '10%');
+
+        auto.append("defs")
+        .append("marker")
+        .attr("id", "arrowhead")
+        .attr("markerWidth", "10")
+        .attr("markerHeight", "7")
+        .attr("refX", "10")
+        .attr("refY", "3.5")
+        .attr("orient", "auto")
+        .append("polygon")
+        .attr("points", "0 0, 10 3.5, 0 7")
+        .attr("fill", "#ffffff");
+        
+        const link = auto.append("g")
+          .selectAll("g")
+          .data(links)
+          .enter().append("g");
+
+        const linkPath = link.append("path")
+          .attr("fill", "none")
+          .attr("stroke", "#999")
+          .attr("stroke-width", 2)
+          .attr("marker-end", "url(#arrowhead)");
+
+        const linkLabel = link.append("text")
+          .attr("font-size", 12)
+          .attr("fill", "#e0e0e0")
+          .attr("text-anchor", "middle")
+          .text(d => d.label);
+
+          const node = auto.append("g")
+          .selectAll("g")
+          .data(nodes)
+          .enter().append("g");
+
+        node.append("circle")
+          .attr("r", radius)
+          .attr("fill", "#2a2a2a")
+          .attr("stroke", d => automato.estadosAceitacao.has(d.id) ? "#ffffff" : "#999")
+          .attr("stroke-width", d => automato.estadosAceitacao.has(d.id) ? 3 : 1);
+
+        node.append("text")
+          .attr("dy", ".35em")
+          .attr("text-anchor", "middle")
+          .text(d => d.id)
+          .attr("fill", "#e0e0e0");
+
+        // Adicionar seta de estado inicial
+        const initialState = node.filter(d => d.id === automato.estadoInicial);
+        initialState.append("path")
+          .attr("d", "M -40,-5 L -30,0 L -40,5")
+          .attr("fill", "none")
+          .attr("stroke", "#ffffff")
+          .attr("stroke-width", 1.5);
+
+        simulation.on("tick", () => {
+          linkPath.attr("d", d => {
+            const dx = d.target.x - d.source.x,
+                  dy = d.target.y - d.source.y,
+                  dr = Math.sqrt(dx * dx + dy * dy);
+            
+            if (d.source === d.target) {
+              // Self-loop
+              const x = d.source.x;
+              const y = d.source.y;
+              return `M${x},${y} C${x-20},${y-30} ${x+20},${y-30} ${x},${y}`;
+            }
+            
+            return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+          });
+
+          linkLabel.attr("transform", d => {
+            if (d.source === d.target) {
+              // Self-loop label
+              return `translate(${d.source.x},${d.source.y - 40})`;
+            }
+            const x = (d.source.x + d.target.x) / 2;
+            const y = (d.source.y + d.target.y) / 2;
+            return `translate(${x},${y})`;
+          });
+
+          node.attr("transform", d => `translate(${d.x},${d.y})`);
+        });
+
+        // Add arrowhead marker
+        auto.append("defs").append("marker")
+          .attr("id", "arrowhead")
+          .attr("viewBox", "-0 -5 10 10")
+          .attr("refX", 22)
+          .attr("refY", 0)
+          .attr("orient", "auto")
+          .attr("markerWidth", 6)
+          .attr("markerHeight", 6)
+          .attr("xoverflow", "visible")
+          .append("path")
+          .attr("d", "M 0,-5 L 10 ,0 L 0,5")
+          .attr("fill", "#999")
+          .style("stroke", "none")
+        .attr("x", "50%")
+        .attr("y", "50%")
+        .attr("text-anchor", "middle");
+      }
+
+      createGraph(automato, height / 8.5, "Autômato Original","Auto");
+      createGraph(minimizado, height / 8.5, "Autômato Minimizado","Auto_Min");
+    }
+
+    function atualizarListaAutomatos() {
+      const automataList = document.getElementById('automataList');
+      const automato1Select = document.getElementById('automato1');
+      const automato2Select = document.getElementById('automato2');
+      
+      automataList.innerHTML = '';
+      automato1Select.innerHTML = '';
+      automato2Select.innerHTML = '';
+
+      for (const nome in automatos) {
+        const item = document.createElement('span');
+        item.textContent = nome;
+        item.classList.add('automaton-item');
+        automataList.appendChild(item);
+
+        const option1 = document.createElement('option');
+        option1.value = nome;
+        option1.textContent = nome;
+        automato1Select.appendChild(option1);
+
+        const option2 = document.createElement('option');
+        option2.value = nome;
+        option2.textContent = nome;
+        automato2Select.appendChild(option2);
+      }
+    }
+
+    function compararAutomatos() {
+      const nome1 = document.getElementById('automato1').value;
+      const nome2 = document.getElementById('automato2').value;
+
+      if (!automatos[nome1] || !automatos[nome2]) {
+        document.getElementById('comparisonOutput').innerHTML = `<p>Erro: Selecione dois autômatos válidos para comparar.</p>`;
+        return;
+      }
+
+      const er1 = automatos[nome1].toER();
+      const er2 = automatos[nome2].toER();
+
+      const saoEquivalentes = er1 === er2;
+
+      document.getElementById('comparisonOutput').innerHTML = `
+        <h3>Comparação de Autômatos</h3>
+        <p>Os autômatos "${nome1}" e "${nome2}" ${saoEquivalentes ? 'são' : 'não são'} equivalentes.</p>
+        <div class="er-display">
+          <strong>Expressão Regular de "${nome1}":</strong> ${er1}
+        </div>
+        <div class="er-display">
+          <strong>Expressão Regular de "${nome2}":</strong> ${er2}
+        </div>
+      `;
+    }
+
+    function isEqual(set1, set2) {
+      if (set1.size !== set2.size) return false;
+      for (let item of set1) {
+        if (!set2.has(item)) return false;
+      }
+      return true;
+    }
+
+    // Inicializar a interface
+    atualizarListaAutomatos();
+  </script>
+</body>
+</html>
