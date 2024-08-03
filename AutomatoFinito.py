@@ -27,7 +27,7 @@ class AutomatoFinito:
     
     # Retorna o conjunto de estados de destino para uma dada transição
     def transicoes_estado(self, estado, simbolo):
-        return self.transicoes.get((estado, simbolo), set())
+        return self.transicoes.get((estado, simbolo), '')
     
     # Verifica se o autômato é um AFD (Autômato Finito Determinístico)
     def is_AFD(self):
@@ -258,8 +258,9 @@ class AutomatoFinito:
                     for destino in destinos:
                         imagem.edge(estado,destino,label=simbolo, color=color, fontcolor=color)
 
-        imagem.node('',shape='point', color=color)
-        imagem.edge('',self.estado_inicial, color=color)
+        if self.estado_inicial!=None:
+            imagem.node('',shape='point', color=color)
+            imagem.edge('',self.estado_inicial, color=color)
 
         return imagem
 

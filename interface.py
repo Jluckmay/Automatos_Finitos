@@ -20,41 +20,53 @@ if arquivo_upload is not None:
 
     automato = ler_automato_arquivo(caminho_arquivo)
 
+
+num_estados = st.number_input('Número de estados', min_value=0, step=1, value=len(automato.estados))
 estados = list(automato.estados)
 estados.sort()
 
-num_estados = st.number_input('Número de estados', min_value=0, step=1, value=len(automato.estados))
-
 # Definição dos estados
 for i in range(num_estados):
-    estado = st.text_input(f'Nome do estado {i+1}', key=f'estado_{i}',value=estados[i])
-    inicial = st.checkbox(f'Estado inicial {i+1}', key=f'inicial_{i}',value=(automato.estado_inicial==estados[i]))
-    aceitacao = st.checkbox(f'Estado de aceitação {i+1}', key=f'aceitacao_{i}',value=(estados[i] in automato.estados_aceitacao))
+    if i<len(automato.estados):
+        estado = st.text_input(f'Nome do estado {i}', key=f'estado_{i}',value=(estados[i]))
+        inicial = st.checkbox(f'Estado inicial {i}', key=f'inicial_{i}',value=(automato.estado_inicial==estados[i]))
+        aceitacao = st.checkbox(f'Estado de aceitação {i}', key=f'aceitacao_{i}',value=(estados[i] in automato.estados_aceitacao))
+    else:
+        estado = st.text_input(f'Nome do estado {i}', key=f'estado_{i}')
+        inicial = st.checkbox(f'Estado inicial {i}', key=f'inicial_{i}')
+        aceitacao = st.checkbox(f'Estado de aceitação {i}', key=f'aceitacao_{i}')
     if estado:
         automato.adicionar_estado(estado, inicial, aceitacao)
 
+alfabeto = st.text_input('Alfabeto',key='alfabeto',value=(str(automato.alfabeto).replace('{','').replace('}','').replace('\'','') if len(automato.alfabeto)>0 else ''))
+alfabeto = alfabeto.replace(' ','').split(',')
+if alfabeto == ['']:
+    alfabeto = []
+    
+automato.alfabeto = alfabeto
 # Definição das transições
-num_transicoes = st.number_input('Número de transições', min_value=0, step=1,value=(len(automato.transicoes)))
-for i in range(num_estados):
-    for j in automato.alfabeto:
-        origem = st.text_input(f'Estado de origem {i+1}', key=f'origem_{i}{j}',value=estados[i])
-        simbolo = st.text_input(f'Símbolo {i+1}', key=f'simbolo_{i}{j}', value=j)
-        destino = st.text_input(f'Estado de destino {i+1}', key=f'destino_{i}{j}',value=str(automato.transicoes_estado(estados[i],j)).replace('{','').replace('\'','').replace('}',''))
-        if origem and simbolo and destino:
+for i in range(len(automato.estados)):
+    for j in alfabeto:
+
+        destino = st.text_input(f'Destino da transição {estados[i]} {j}', key=f'origem_{i}{j}',value=str(automato.transicoes_estado(estados[i],j)).replace('{','').replace('\'','').replace('}',''))
+
+        if (destino in automato.estados):
             if(',' in destino):
                 for no in destino.replace(' ','').split(','):
-                    automato.adicionar_transicao(origem, simbolo, no)
+                    automato.adicionar_transicao(estados[i], j, no)
+            else:
+                automato.adicionar_transicao(estados[i], j, destino)
 
-# Gerar imagem
-if st.button('Gerar imagem'):
+if automato.estado_inicial!=None:
+    st.text("O automato inserido é um AFD" if automato.is_AFD() else "O automato inserido não é um AFD")
+    st.text("O automato inserido é completo" if automato.is_complete() else "O automato inserido não é completo")
+    st.text("Expressão Regular: "+automato.to_er())
+
+    if st.button('Minimizar'):
+        automato = automato.minimizar()
 
     image = automato.criar_imagem()
-
     st.graphviz_chart(image,use_container_width=True)
-
     image = automato.render_image(image)
-
     image = open(image,'rb')
     st.download_button('Baixar',data=image,file_name='automato.png',mime="image/png")
-else:
-    st.write('Por favor, carregue um arquivo de descrição do autômato no formato especificado.')
