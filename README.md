@@ -4,12 +4,12 @@ Este projeto implementa um autômato finito, incluindo uma interface visual para
 
 ## Estrutura do Projeto
 
-- **`Automatos`**: Pasta com arquivos txt, cada arquivo contendo a estrutura de um automato finito de entrada.
-- **`AutomatoFinito.py`**: Script contendo a implementação principal do autômato finito.
-- **`interface.py`**: Script para a interface visual do projeto.
-- **`projeto.py`**: Script que integra diferentes componentes do projeto sem o uso de interface gráfica.
-- **`automato.html`** e **`interface.html`**: Arquivos HTML usados para exibir a interface do autômato.
-- **`palavras.txt`**: Arquivo de texto contendo dados de entrada para o autômato.
+- **`Automatos`**: Pasta com arquivos txt, cada arquivo contendo a estrutura de um automato finito de entrada;
+- **`AutomatoFinito.py`**: Script contendo a implementação principal do autômato finito;
+- **`interface.py`**: Script para a interface visual do projeto;
+- **`projeto.py`**: Script que integra diferentes componentes do projeto sem o uso de interface gráfica;
+- **`automato.html`** e **`interface.html`**: Arquivos HTML usados para exibir a interface do autômato;
+- **`palavras.txt`**: Arquivo de texto contendo dados de entrada para o autômato;
 - **`requirements.txt`**: Arquivo contendo as dependências do projeto.
 
 ## Dependências
@@ -49,9 +49,18 @@ estado_inicial:t1
 estados_aceitacao:t3
 ```
 
+Sendo:
+
+- **`estados`**: Lista de estados do autômato;
+- **`alfabeto`**: Conjunto de símbolos aceitos;
+- **`transicoes`**: Mapeamento das transições entre estados;
+- **`estado_inicial`**: O estado inicial do autômato;
+- **`estados_aceitacao`**: Conjunto de estados de aceitação.
+
+
 ## Detalhes Técnicos
 
-- O projeto foi desenvolvido em Python e utiliza bibliotecas específicas mencionadas no arquivo requirements.txt.
+- O projeto foi desenvolvido em Python e utiliza bibliotecas específicas mencionadas no arquivo **`requirements.txt`**.
 
 ## Contribuições
 
