@@ -264,7 +264,7 @@ class AutomatoFinito:
 
         return imagem
 
-    def render_image(self, imagem):
+    def render_image(self, imagem, nome):
          # Configuração de pasta e nome de imagem
         pasta = 'Imagens'
         if not os.path.exists(pasta):
@@ -273,11 +273,20 @@ class AutomatoFinito:
         automatos = os.listdir(pasta)
         automatos.sort()
 
+        if ".png" in nome:
+            nome = nome.split('.')[0]
+
         if not automatos:
-            nome_imagem = '0'
+            nome_imagem = 'automato0'
         else:
-            nome_imagem = automatos[-1].split('.')[0]
-            nome_imagem = str(int(nome_imagem) + 1)
+    
+            nome_imagem = automatos[-1].split('.')[0].replace('automato','').replace('_AFD','').replace('_Min','')
+            nome_imagem = nome + str(int(nome_imagem))
+
+            while ((nome_imagem+'.png') in automatos):
+                automatos.pop()
+                nome_imagem = automatos[-1].split('.')[0].replace('automato','').replace('_AFD','').replace('_Min','')
+                nome_imagem = nome + str(int(nome_imagem) + 1)
 
         caminho = os.path.join(pasta, nome_imagem)
 
@@ -298,7 +307,7 @@ class AutomatoFinito:
         
         return (f"Estados: {estados_ordenados}\n"
                 f"Alfabeto: {alfabeto_ordenado}\n"
-                f"Transições:\n" + "\n".join(transicoes_formatadas) + "\n"
+                f"Transições:" + "\n".join(transicoes_formatadas) + "\n"
                 f"Estado Inicial: {self.estado_inicial}\n"
                 f"Estados de Aceitação: {estados_aceitacao_ordenados}")
 
