@@ -1,0 +1,16 @@
+estados:q0,q1,q2,q3,q_accept,q_reject
+alfabeto:0,1
+fita_alfabeto:0,1,X,_
+transicoes:
+q0 0 q1 X R
+q0 1 q1 X R
+q1 0 q1 0 R
+q1 1 q1 1 R
+q1 _ q2 _ L
+q2 X q2 X L
+q2 0 q0 0 R
+q2 1 q0 1 R
+q0 _ q_accept _ N
+estado_inicial:q0
+simbolo_branco:_
+estados_aceitacao:q_accept

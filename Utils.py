@@ -1,4 +1,5 @@
 from AutomatoFinito import AutomatoFinito
+from MaquinaTuring import MaquinaTuring
 import os
 
 # Função para ler um autômato de um arquivo
@@ -49,3 +50,45 @@ def ler_automatos_pasta(pasta):
 # Método para verificar se dois autômatos mínimos são equivalentes
 def automatos_equivalentes(automato1, automato2):
     return (automato1.to_er() == automato2.to_er())
+
+# Função para ler uma Máquina de Turing de um arquivo
+def ler_arquivo_maquina_turing(caminho_arquivo):
+    with open(caminho_arquivo, 'r') as arquivo:
+        linhas = arquivo.readlines()
+
+    estados = set()
+    alfabeto = set()
+    fita_alfabeto = set()
+    transicoes = {}
+    estado_inicial = None
+    simbolo_branco = None
+    estados_aceitacao = set()
+
+    for linha in linhas:
+        linha = linha.strip()
+        if not linha or linha.startswith('#'):
+            continue
+        
+        if linha.startswith('estados:'):
+            estados = set(linha.split(':')[1].split(','))
+        elif linha.startswith('alfabeto:'):
+            alfabeto = set(linha.split(':')[1].split(','))
+        elif linha.startswith('fita_alfabeto:'):
+            fita_alfabeto = set(linha.split(':')[1].split(','))
+        elif linha.startswith('transicoes:'):
+            continue
+        elif linha.startswith('estado_inicial:'):
+            estado_inicial = linha.split(':')[1]
+        elif linha.startswith('simbolo_branco:'):
+            simbolo_branco = linha.split(':')[1]
+        elif linha.startswith('estados_aceitacao:'):
+            estados_aceitacao = set(linha.split(':')[1].split(','))
+        else:
+            partes = linha.split()
+            if len(partes) == 5:
+                estado_atual, simbolo_atual, novo_estado, novo_simbolo, direcao = partes
+                transicoes[(estado_atual, simbolo_atual)] = (novo_estado, novo_simbolo, direcao)
+
+    maquina = MaquinaTuring(estados,alfabeto,fita_alfabeto,transicoes,estado_inicial,simbolo_branco,estados_aceitacao)
+    return maquina
+

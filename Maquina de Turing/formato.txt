@@ -1,0 +1,10 @@
+estados:q0,q1,qf
+alfabeto:0,1
+fita_alfabeto:0,1,_
+transicoes:
+q0 0 q1 1 R
+q1 0 q1 0 R
+q1 _ qf _ N
+estado_inicial:q0
+simbolo_branco:_
+estados_aceitacao:qf
