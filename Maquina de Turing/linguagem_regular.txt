@@ -1,15 +1,16 @@
-estados:q0,q1,q2,q3,q_accept,q_reject
-alfabeto:a,b
-fita_alfabeto:a,b,X,_
+estados:q0,q1,q2,q_accept,q_reject
+alfabeto:0,1
+fita_alfabeto:0,1,_
 transicoes:
-q0 a q1 X R
-q1 a q1 a R
-q1 b q2 X R
-q2 b q2 b R
-q2 _ q3 _ L
-q3 X q3 X L
-q3 a q0 a R
+q0 0 q1 0 R
+q0 1 q2 1 R
+q1 0 q0 0 R
+q1 1 q1 1 R
+q2 0 q2 0 R
+q2 1 q2 1 R
 q0 _ q_accept _ N
+q1 _ q_reject _ N
+q2 _ q_reject _ N
 estado_inicial:q0
 simbolo_branco:_
 estados_aceitacao:q_accept

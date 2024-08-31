@@ -68,6 +68,8 @@ Sendo:
 ## Classe AutomatoFinito
 A classe AutomatoFinito representa um autômato finito, com funcionalidades para adicionar estados e transições, simular o autômato, converter para um autômato finito determinístico (AFD), minimizar o autômato e converter para uma expressão regular. Abaixo está uma descrição detalhada de cada método:
 
+- Tipo de Linguagem Aceita: Linguagens Regulares
+
 - Métodos da Classe
 - **`__init__(self, estados=set(), alfabeto=set(), transicoes={}, estado_inicial=None, estados_aceitacao=set())`**
 Inicializa um autômato finito com os parâmetros fornecidos:
@@ -121,6 +123,10 @@ Representação em string do autômato. Formata estados, alfabeto, transições,
 
 ## Classe MaquinaTuring
 A classe MaquinaTuring estende a classe AutomatoFinito para representar uma Máquina de Turing. Inclui métodos para inicializar a fita, mover a cabeça de leitura/gravação, e executar a máquina. Abaixo está uma descrição detalhada de cada método:
+
+- Tipo de Linguagem Aceita: Linguagens Enumeráveis Recursivamente.
+
+- Condição de Parada: A execução será encerrada ao atingir um estado de aceitação (Entrada Aceita) ou se chegar a uma transição não definida (Entrada Não Aceita).
 
 - Métodos da Classe
 - **`__init__(self, estados=set(), alfabeto=set(), fita_alfabeto=set(), transicoes={}, estado_inicial=None, branco=None, estados_aceitacao=set())`**

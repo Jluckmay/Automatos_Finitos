@@ -1,14 +1,20 @@
 estados:q0,q1,q2,q3,q4,q_accept,q_reject
 alfabeto:(,)
-fita_alfabeto:(,),X,_
+fita_alfabeto:(,),_,X
 transicoes:
-q0 ( q1 X R
-q0 ) q4 X R
+q0 ( q1 ( R
+q0 ) q2 ) R
 q1 ( q1 ( R
-q1 ) q2 X R
+q1 ) q1 ) R
+q1 _ q3 _ L
 q2 ( q2 ( R
-q2 ) q3 X R
-q3 _ q0 _ R
+q2 ) q2 ) R
+q2 _ q4 _ L
+q3 ( q3 ( L
+q3 ) q3 ) L
+q3 _ q0 _ N
+q4 ( q4 ( L
+q4 ) q4 ) L
 q4 _ q_accept _ N
 estado_inicial:q0
 simbolo_branco:_

@@ -1,19 +1,21 @@
-estados:q0,q1,q2,q3,q4,q5,q6,q_accept,q_reject
+estados:q0,q1,q2,q3,q4,q5,q6,q7,q_accept,q_reject
 alfabeto:1
 fita_alfabeto:1,X,_
 transicoes:
 q0 1 q1 X R
 q1 1 q1 1 R
 q1 _ q2 _ L
-q2 1 q3 1 L
+q2 1 q3 X L
+q3 1 q3 1 L
 q3 X q4 X R
 q4 1 q4 1 R
 q4 _ q5 _ L
 q5 X q5 X L
-q5 1 q0 1 R
-q0 _ q6 _ N
+q5 _ q6 _ N
 q6 X q6 X L
-q6 _ q_accept _ N
+q6 _ q7 _ R
+q7 X q7 X R
+q7 _ q_accept _ N
 estado_inicial:q0
 simbolo_branco:_
 estados_aceitacao:q_accept
