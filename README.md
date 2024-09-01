@@ -34,6 +34,9 @@ streamlit run interface.py
 ```bash
 python projeto.py
 ```
+
+- Para Autômatos Finitos:
+
 Certifique-se de configurar corretamente os arquivos de entrada de palavras a serem testadas **`palavras.txt`** e da estrutura dos automatos a serem testados, os quais devem estar na pasta **`Automatos`** em formato txt com a seguinte formatação:
 
 ```txt
@@ -60,6 +63,33 @@ Sendo:
 - **`estado_inicial`**: O estado inicial do autômato;
 - **`estados_aceitacao`**: Conjunto de estados de aceitação.
 
+- Para Máquinas de Turing:
+
+
+Certifique-se de configurar corretamente os arquivos de entrada de palavras a serem testadas **`palavras.txt`** e da estrutura dos automatos a serem testados, os quais devem estar na pasta **`Automatos`** em formato txt com a seguinte formatação:
+
+```txt
+estados:q0,q1,qf
+alfabeto:0,1
+fita_alfabeto:0,1,_
+transicoes:
+q0 0 q1 1 R
+q1 0 q1 0 R
+q1 _ qf _ N
+estado_inicial:q0
+simbolo_branco:_
+estados_aceitacao:qf
+```
+
+Sendo:
+
+- **`estados`**: Lista de estados da máquina;
+- **`alfabeto`**: Conjunto de símbolos aceitos;
+- **`fita_alfabeto`**: Conjunto de símbolos aceitos na fita;
+- **`transicoes`**: Mapeamento das transições entre estados;
+- **`estado_inicial`**: O estado inicial da máquina;
+- **`simbolo_branco`**: Simbolo branco;
+- **`estados_aceitacao`**: Conjunto de estados de aceitação.
 
 ## Detalhes Técnicos
 
